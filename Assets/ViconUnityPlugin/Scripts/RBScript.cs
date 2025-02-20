@@ -51,7 +51,13 @@ namespace UnityVicon
         // right     -y     x
         // See https://gamedev.stackexchange.com/questions/157946/converting-a-quaternion-in-a-right-to-left-handed-coordinate-system
 
-        Root.localRotation = new Quaternion((float)ORot.Rotation[1], -(float)ORot.Rotation[2], -(float)ORot.Rotation[0], (float)ORot.Rotation[3]);
+        Root.localRotation = new Quaternion(
+    (float)ORot.Rotation[1],  // Vicon Y -> Unity X
+    -(float)ORot.Rotation[2], // Vicon Z -> Unity -Y
+    -(float)ORot.Rotation[0], // Vicon X -> Unity -Z
+    (float)ORot.Rotation[3]   // W remains the same
+);
+
         Root.localPosition = new Vector3(-(float)OTran.Translation[1] * 0.001f, (float)OTran.Translation[2] * 0.001f, (float)OTran.Translation[0] * 0.001f);
 
         m_LastGoodPosition = Root.localPosition;
