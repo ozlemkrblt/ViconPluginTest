@@ -26,6 +26,12 @@ namespace UnityVicon
     void Update()
     {
 
+      if (Client == null)
+      {
+        Debug.LogError("Vicon Client is null! Make sure it's initialized before use.");
+        return;
+      }
+
       Output_GetSubjectRootSegmentName OGSRSN = Client.GetSubjectRootSegmentName(ObjectName);
       string SegRootName = OGSRSN.SegmentName;
 
@@ -51,7 +57,17 @@ namespace UnityVicon
         // right     -y     x
         // See https://gamedev.stackexchange.com/questions/157946/converting-a-quaternion-in-a-right-to-left-handed-coordinate-system
 
-        Root.localRotation = new Quaternion((float)ORot.Rotation[1], -(float)ORot.Rotation[2], -(float)ORot.Rotation[0], (float)ORot.Rotation[3]);
+        Debug.Log($"Vicon Raw Rotation: ({ORot.Rotation[0]}, {ORot.Rotation[1]}, {ORot.Rotation[2]}, {ORot.Rotation[3]})");
+
+
+        Root.localRotation = new Quaternion((float)ORot.Rotation[0], -(float)ORot.Rotation[2], -(float)ORot.Rotation[0], (float)ORot.Rotation[3]);
+
+        Quaternion handednessFix = Quaternion.Euler(0, 0, -180); // Rotate Z by 180°
+        Root.localRotation *= handednessFix;
+
+        Debug.Log($"Converted Unity Rotation: {Root.localRotation.eulerAngles}");
+
+
         Root.localPosition = new Vector3(-(float)OTran.Translation[1] * 0.001f, (float)OTran.Translation[2] * 0.001f, (float)OTran.Translation[0] * 0.001f);
 
         m_LastGoodPosition = Root.localPosition;
@@ -97,7 +113,7 @@ namespace UnityVicon
       // Count the number of markers
       uint MarkerCount = Client.GetMarkerCount(ObjectName).MarkerCount;
       Debug.Log($"Marker count for {ObjectName}: {MarkerCount}");
-      Console.WriteLine("    Markers ({0}):", MarkerCount);
+      Debug.Log($"Markers: ({MarkerCount}):");
       for (uint MarkerIndex = 0; MarkerIndex < MarkerCount; ++MarkerIndex)
       {
         // Get the marker name
