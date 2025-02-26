@@ -394,9 +394,8 @@ GameObject:
   - component: {fileID: 1890326342}
   - component: {fileID: 1890326341}
   - component: {fileID: 1890326345}
-  - component: {fileID: 1890326346}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Book
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -501,20 +500,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SubjectName: Book
-  Client: {fileID: 781951873}
---- !u!114 &1890326346
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1890326340}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c4fead0a62ec76b479f2b95a6bab9234, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObjectName: Book
   Client: {fileID: 781951873}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

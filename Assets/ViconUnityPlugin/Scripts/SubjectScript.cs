@@ -54,6 +54,20 @@ namespace UnityVicon
 
       }
 
+      //DEBUGGING
+      Output_GetSegmentCount OGSRSC = Client.GetSegmentCount(SubjectName);
+      if (OGSRSC.Result != Result.Success)
+      {
+        Debug.LogError("Failed to get root segment count.");
+        return;
+      }
+      else
+      {
+
+        Debug.Log($"Subject Segment Count: {OGSRSC.SegmentCount}");
+      }
+      //
+
       Transform Root = transform.root;
       if (Root == null)
       {
@@ -61,19 +75,36 @@ namespace UnityVicon
         return;
       }
 
+      //DEBUGGING
+      Output_GetSegmentChildCount OutputGSCC = Client.GetSegmentChildCount(SubjectName, OGSRSN.SegmentName);
+      if (OutputGSCC.Result != Result.Success)
+      {
+        Debug.LogError($"Failed to get segment child count: {OutputGSCC.Result}");
+        return;
+      }
+      Debug.Log($"Segment Child Count: {OutputGSCC.SegmentCount}");
+
+      Output_GetSegmentChildName OutputGSCN = Client.GetSegmentChildName(SubjectName, OGSRSN.SegmentName, 0);
+      if (OutputGSCN.Result != Result.Success)
+      {
+        Debug.LogError($"Failed to get segment child name: {OutputGSCN.Result}");
+        return;
+      }
+      Debug.Log($"Segment Child Name: {OutputGSCN.SegmentName}");
+      //
+
       FindAndTransform(Root, OGSRSN.SegmentName);
+      //DEBUGGING
       uint SubjectCount = Client.GetSubjectCount().SubjectCount;
       Debug.Log($"Total Subjects in Vicon: {SubjectCount}");
 
       for (uint i = 0; i < SubjectCount; i++)
       {
-        string SubjectName = Client.GetSubjectName(i).SubjectName;
-        Debug.Log($"Subject {i}: {SubjectName}");
+        string currentSubjectName = Client.GetSubjectName(i).SubjectName;
+        Debug.Log($"Subject {i}: {currentSubjectName}");
       }
-
+      //
       PrintMarkerData();
-
-
     }
 
     string strip(string BoneName)
@@ -85,20 +116,31 @@ namespace UnityVicon
       }
       return BoneName;
     }
+
+    //TODO: Continue to debugging from this point. It seems like segment count, segment names, children of the root segment etc. all are retrieved correctly in LateUpdate().
+    //However in this method, it cannot retrieve the children because it looks for transform's children, not the segment's children.
     void FindAndTransform(Transform iTransform, string BoneName)
     {
+      //Debug.Log($"Transform: {iTransform.name}");
+
       int ChildCount = iTransform.childCount;
+      Debug.Log($"Checking child count: {ChildCount}"); // Log all child names to check against BoneName
+
       for (int i = 0; i < ChildCount; ++i)
       {
         Transform Child = iTransform.GetChild(i);
+        Debug.Log($"Checking child: {Child.name}"); // Log all child names to check against BoneName
+
         Debug.Log($"Child: {Child.name}");
         if (strip(Child.name) == BoneName)
         {
+          Debug.Log($"Found Bone: {BoneName}");
           ApplyBoneTransform(Child);
           TransformChildren(Child);
           break;
         }
         // if not finding root in this layer, try the children
+        //Debug.Log($"Checking children of {Child.name}");
         FindAndTransform(Child, BoneName);
       }
     }
@@ -112,14 +154,16 @@ namespace UnityVicon
         TransformChildren(Child);
       }
     }
-    // map the orientation back for forward
 
+    // map the orientation back for forward
     private void ApplyBoneTransform(Transform Bone)
     {
       string BoneName = strip(Bone.gameObject.name);
 
 
       Output_GetSegmentLocalRotationQuaternion ORot = Client.GetSegmentRotation(SubjectName, BoneName);
+      Debug.Log($"Rotation Success: {ORot.Result}");
+
       if (ORot.Result == Result.Success)
       {
         // mapping back to default data stream axis
@@ -134,10 +178,10 @@ namespace UnityVicon
         // See https://gamedev.stackexchange.com/questions/157946/converting-a-quaternion-in-a-right-to-left-handed-coordinate-system 
 
         Quaternion Rot = new Quaternion(-(float)ORot.Rotation[2], -(float)ORot.Rotation[0], (float)ORot.Rotation[1], (float)ORot.Rotation[3]);
-                // mapping right hand to left hand flipping x
+        // mapping right hand to left hand flipping x
         Bone.localRotation = new Quaternion(-Rot.x, Rot.y, Rot.z, -Rot.w);
         Debug.Log($"Applying Rotation: {Bone.name} -> {Bone.localRotation}");
-        
+
       }
 
       Output_GetSegmentLocalTranslation OTran;
@@ -149,6 +193,8 @@ namespace UnityVicon
       {
         OTran = Client.GetSegmentTranslation(SubjectName, BoneName);
       }
+
+      Debug.Log($"Occluded: {OTran.Occluded},Translation Success: {OTran.Result}");
 
       if (OTran.Result == Result.Success)
       {
@@ -213,13 +259,6 @@ namespace UnityVicon
 
       }
     }
-
-
-
-
-
-
-
   } //end of program
 }// end of namespace
 

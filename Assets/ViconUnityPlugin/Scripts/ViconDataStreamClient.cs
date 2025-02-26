@@ -47,7 +47,7 @@ public class ViconDataStreamClient : MonoBehaviour
 
   private bool bThreadRunning = false; //Manages multi-threading.
   Thread m_Thread; //The actual background thread for connecting.
-  
+
 
 
 
@@ -295,6 +295,10 @@ public class ViconDataStreamClient : MonoBehaviour
 
     m_Client.EnableMarkerData();
     print("Marker Data Enabled:" + m_Client.IsMarkerDataEnabled().Enabled);
+    m_Client.EnableSegmentData();
+    print("Segment Data Enabled:" + m_Client.IsSegmentDataEnabled().Enabled);
+
+
 
     SetAxisMapping(Direction.Forward, Direction.Left, Direction.Up);
     //SetAxisMapping(Direction.Right, Direction.Up, Direction.Backward);
@@ -306,7 +310,7 @@ public class ViconDataStreamClient : MonoBehaviour
     while (GetFrameThread && bThreadRunning)
     {
       GetNewFrame();
-        if (m_Client.GetFrame().Result != Result.Success)
+      if (m_Client.GetFrame().Result != Result.Success)
       {
         Debug.LogWarning("Failed to get new frame data.");
       }
@@ -314,7 +318,7 @@ public class ViconDataStreamClient : MonoBehaviour
 
     bThreadRunning = false;
   }
-  
+
   /**
   * Retrieves a new frame from the Vicon DataStream client on late update if a separate frame acquisition thread is not used.
   **/
@@ -339,7 +343,8 @@ public class ViconDataStreamClient : MonoBehaviour
     }
   }
 
-  public Output_GetSubjectCount GetSubjectCount ( ){
+  public Output_GetSubjectCount GetSubjectCount()
+  {
     if (IsRetimed)
     {
       return m_RetimingClient.GetSubjectCount();
@@ -349,7 +354,7 @@ public class ViconDataStreamClient : MonoBehaviour
       return m_Client.GetSubjectCount();
     }
   }
- public Output_GetSubjectName GetSubjectName(uint SubjectIndex)
+  public Output_GetSubjectName GetSubjectName(uint SubjectIndex)
   {
     if (IsRetimed)
     {
@@ -360,13 +365,54 @@ public class ViconDataStreamClient : MonoBehaviour
       return m_Client.GetSubjectName(SubjectIndex);
     }
   }
- 
- 
+
+
+  public Output_GetSegmentCount GetSegmentCount(string SubjectName)
+  {
+    if (IsRetimed)
+    {
+      return m_RetimingClient.GetSegmentCount(SubjectName);
+    }
+    else
+    {
+      return m_Client.GetSegmentCount(SubjectName);
+    }
+  }
+  /**
+  * Retrieves the number of child segments for a given segment of a specified subject.
+  * @param SubjectName The name of the subject.
+  * @param name SegmentName The name of the segment.
+  * @return An instance of Output_GetSegmentChildCount containing the number of child segments.
+  **/
+  public Output_GetSegmentChildCount GetSegmentChildCount(string SubjectName, string SegmentName)
+  {
+    if (IsRetimed)
+    {
+      return m_RetimingClient.GetSegmentChildCount(SubjectName, SegmentName);
+    }
+    else
+    {
+      return m_Client.GetSegmentChildCount(SubjectName, SegmentName);
+    }
+  }
+
+  public Output_GetSegmentChildName GetSegmentChildName(string SubjectName, string SegmentName, uint ChildIndex)
+  {
+    if (IsRetimed)
+    {
+      return m_RetimingClient.GetSegmentChildName(SubjectName, SegmentName, ChildIndex);
+    }
+    else
+    {
+      return m_Client.GetSegmentChildName(SubjectName, SegmentName, ChildIndex);
+    }
+  }
+
   /**
   * Gets the local rotation quaternion of a specified segment for a given subject.
 
-  * @param SubjectName">The name of the subject.
-  * @param SegmentName">The name of the segment.
+  * @param SubjectName The name of the subject.
+  * @param SegmentName The name of the segment.
   * @return The local rotation quaternion of the specified segment.
     **/
   public Output_GetSegmentLocalRotationQuaternion GetSegmentRotation(string SubjectName, string SegmentName)
