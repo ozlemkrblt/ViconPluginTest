@@ -18,11 +18,16 @@ namespace UnityVicon
 
     public ViconDataStreamClient Client;
 
+    //Added for caching the last good pose
+
+    private Quaternion m_LastGoodRotation;
+    private Vector3 m_LastGoodPosition;
+    private bool m_bHasCachedPose = false;
     public SubjectScript()
     {
     }
 
-    void LateUpdate()
+    void Update()
     {
       if (Client == null)
       {
@@ -35,6 +40,22 @@ namespace UnityVicon
         Debug.LogError("SubjectName is NULL or EMPTY! Make sure it's set before calling LateUpdate.");
         return;
       }
+
+      //DEBUGGING
+      Output_GetSegmentCount OGSRSC = Client.GetSegmentCount(SubjectName);
+      if (OGSRSC.Result != Result.Success)
+      {
+        Debug.LogError("Failed to get root segment count.");
+        return;
+      }
+      else
+      {
+
+        Debug.Log($"Subject Total Segment Count: {OGSRSC.SegmentCount}");
+
+      }
+
+      //
 
       Output_GetSubjectRootSegmentName OGSRSN = Client.GetSubjectRootSegmentName(SubjectName);
       if (OGSRSN.Result != Result.Success)
@@ -54,21 +75,8 @@ namespace UnityVicon
 
       }
 
-      //DEBUGGING
-      Output_GetSegmentCount OGSRSC = Client.GetSegmentCount(SubjectName);
-      if (OGSRSC.Result != Result.Success)
-      {
-        Debug.LogError("Failed to get root segment count.");
-        return;
-      }
-      else
-      {
-
-        Debug.Log($"Subject Segment Count: {OGSRSC.SegmentCount}");
-      }
-      //
-
       Transform Root = transform.root;
+
       if (Root == null)
       {
         Debug.LogError("Transform root is NULL. Make sure the GameObject has a valid hierarchy.");
@@ -76,6 +84,8 @@ namespace UnityVicon
       }
 
       //DEBUGGING
+      print("Subject Segment Hiearchy:");
+      DebugHierarchy(Root);
       Output_GetSegmentChildCount OutputGSCC = Client.GetSegmentChildCount(SubjectName, OGSRSN.SegmentName);
       if (OutputGSCC.Result != Result.Success)
       {
@@ -94,6 +104,7 @@ namespace UnityVicon
       //
 
       FindAndTransform(Root, OGSRSN.SegmentName);
+
       //DEBUGGING
       uint SubjectCount = Client.GetSubjectCount().SubjectCount;
       Debug.Log($"Total Subjects in Vicon: {SubjectCount}");
@@ -104,7 +115,8 @@ namespace UnityVicon
         Debug.Log($"Subject {i}: {currentSubjectName}");
       }
       //
-      PrintMarkerData();
+      //DebugHierarchy(Root); // Print hierarchy for debugging
+      //PrintMarkerData();
     }
 
     string strip(string BoneName)
@@ -125,13 +137,11 @@ namespace UnityVicon
 
       int ChildCount = iTransform.childCount;
       Debug.Log($"Checking child count: {ChildCount}"); // Log all child names to check against BoneName
-
       for (int i = 0; i < ChildCount; ++i)
       {
         Transform Child = iTransform.GetChild(i);
-        Debug.Log($"Checking child: {Child.name}"); // Log all child names to check against BoneName
+        Debug.Log($"Checking child name: {Child.name}"); // Log all child names to check against BoneName
 
-        Debug.Log($"Child: {Child.name}");
         if (strip(Child.name) == BoneName)
         {
           Debug.Log($"Found Bone: {BoneName}");
@@ -140,7 +150,7 @@ namespace UnityVicon
           break;
         }
         // if not finding root in this layer, try the children
-        //Debug.Log($"Checking children of {Child.name}");
+        Debug.Log($"Checking children of {Child.name}");
         FindAndTransform(Child, BoneName);
       }
     }
@@ -164,7 +174,7 @@ namespace UnityVicon
       Output_GetSegmentLocalRotationQuaternion ORot = Client.GetSegmentRotation(SubjectName, BoneName);
       Debug.Log($"Rotation Success: {ORot.Result}");
 
-      if (ORot.Result == Result.Success)
+      if (ORot.Result == Result.Success && ORot.Occluded == false)
       {
         // mapping back to default data stream axis
 
@@ -177,11 +187,18 @@ namespace UnityVicon
         // right     -y     x
         // See https://gamedev.stackexchange.com/questions/157946/converting-a-quaternion-in-a-right-to-left-handed-coordinate-system 
 
-        Quaternion Rot = new Quaternion(-(float)ORot.Rotation[2], -(float)ORot.Rotation[0], (float)ORot.Rotation[1], (float)ORot.Rotation[3]);
-        // mapping right hand to left hand flipping x
-        Bone.localRotation = new Quaternion(-Rot.x, Rot.y, Rot.z, -Rot.w);
+        Bone.localRotation = new Quaternion(-(float)ORot.Rotation[2], -(float)ORot.Rotation[0], (float)ORot.Rotation[1], (float)ORot.Rotation[3]);
         Debug.Log($"Applying Rotation: {Bone.name} -> {Bone.localRotation}");
-
+        m_LastGoodRotation = Bone.localRotation;
+        m_bHasCachedPose = true;
+      }
+      else
+      {
+        if (m_bHasCachedPose)
+        {
+          Debug.LogWarning("Vicon data is occluded, using last good pose");
+          Bone.localRotation = m_LastGoodRotation;
+        }
       }
 
       Output_GetSegmentLocalTranslation OTran;
@@ -196,7 +213,7 @@ namespace UnityVicon
 
       Debug.Log($"Occluded: {OTran.Occluded},Translation Success: {OTran.Result}");
 
-      if (OTran.Result == Result.Success)
+      if (OTran.Result == Result.Success && !OTran.Occluded)
       {
         // Input data is in Vicon co-ordinate space; z-up, x-forward, rhs.
         // We need it in Unity space, y-up, z-forward lhs
@@ -206,9 +223,27 @@ namespace UnityVicon
         // right     -y     x
         // See https://gamedev.stackexchange.com/questions/157946/converting-a-quaternion-in-a-right-to-left-handed-coordinate-system
 
+        Debug.Log($"Raw Vicon Translation: X={OTran.Translation[0]}, Y={OTran.Translation[1]}, Z={OTran.Translation[2]}");
+        Debug.Log($"Converted Position: {-(float)OTran.Translation[2] * 0.001f}, {-(float)OTran.Translation[0] * 0.001f}, {(float)OTran.Translation[1] * 0.001f}");
 
-        Vector3 Translate = new Vector3(-(float)OTran.Translation[2] * 0.001f, -(float)OTran.Translation[0] * 0.001f, (float)OTran.Translation[1] * 0.001f);
-        Bone.localPosition = new Vector3(-Translate.x, Translate.y, Translate.z);
+        Bone.localPosition = new Vector3(-(float)OTran.Translation[2] * 0.001f, -(float)OTran.Translation[0] * 0.001f, (float)OTran.Translation[1] * 0.001f);
+        //test if unity works correctly : 
+
+        //Bone.localPosition += Vector3.right * 0.01f;
+
+
+        Debug.Log($"Applying Translation: {Bone.name} -> {Bone.localPosition}");
+
+        m_LastGoodPosition = Bone.localPosition;
+        m_bHasCachedPose = true;
+      }
+      else
+      {
+        if (m_bHasCachedPose)
+        {
+          Debug.LogWarning("Vicon data is occluded, using last good pose");
+          Bone.localPosition = m_LastGoodPosition;
+        }
       }
 
       // If there's a scale for this subject in the datastream, apply it here.
@@ -259,6 +294,21 @@ namespace UnityVicon
 
       }
     }
+
+
+    void DebugHierarchy(Transform root, int depth = 0)
+    {
+
+      string indent = new string('-', depth * 2);
+      Debug.Log($"{indent} {root.name} (Children: {root.childCount})");
+
+      for (int i = 0; i < root.childCount; i++)
+      {
+        DebugHierarchy(root.GetChild(i), depth + 1);
+      }
+    }
+
+
   } //end of program
 }// end of namespace
 
