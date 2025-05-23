@@ -428,6 +428,18 @@ public class ViconDataStreamClient : MonoBehaviour
 
   }
 
+  public Output_GetSegmentStaticRotationQuaternion GetSegmentStaticRotationQuaternion(string SubjectName, string SegmentName)
+  {
+    if (IsRetimed)
+    {
+      return m_RetimingClient.GetSegmentStaticRotationQuaternion(SubjectName, SegmentName);
+    }
+    else
+    {
+      return m_Client.GetSegmentStaticRotationQuaternion(SubjectName, SegmentName);
+    }
+  }
+
   /**
   * Gets the local translation(position data) of a specified segment for a given subject.
   * @param SubjectName The name of the subject.
@@ -445,6 +457,18 @@ public class ViconDataStreamClient : MonoBehaviour
       return m_Client.GetSegmentLocalTranslation(SubjectName, SegmentName);
     }
 
+  }
+
+  public Output_GetSegmentStaticTranslation GetSegmentStaticTranslation(string SubjectName, string SegmentName)
+  {
+    if (IsRetimed)
+    {
+      return m_RetimingClient.GetSegmentStaticTranslation(SubjectName, SegmentName);
+    }
+    else
+    {
+      return m_Client.GetSegmentStaticTranslation(SubjectName, SegmentName);
+    }
   }
   /**
   * Gets the static scale of a specified segment for a given subject.
