@@ -117,7 +117,8 @@ public class ViconDataStreamClient : MonoBehaviour
     //     print("Configured adapter for wireless settings");
     //   }
     // }
-    print("Vicon Client Connected: " + m_Client.IsConnected());
+ 
+
     print("Starting...");
     Output_GetVersion OGV = m_Client.GetVersion(); //Retrieves and prints the Vicon DataStream SDK version.
     print("Using Datastream version " + OGV.Major + "." + OGV.Minor + "." + OGV.Point + "." + OGV.Revision);
@@ -251,6 +252,7 @@ public class ViconDataStreamClient : MonoBehaviour
     {
       Output_Connect OC = m_Client.Connect(CombinedHostnameString);
       print("Connect result: " + OC.Result);
+      print("Connected by using Vicon DataStream client.");
 
       System.Threading.Thread.Sleep(200);
     }
@@ -584,7 +586,6 @@ public class ViconDataStreamClient : MonoBehaviour
   * @param MarkerIndex The index of the marker.
   * @return The name of the marker.
   **/
-
 
   public Output_GetMarkerCount GetMarkerCount(string SubjectName)
   {
