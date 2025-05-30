@@ -397,7 +397,6 @@ namespace UnityVicon
       for (int i = 0; i < ChildCount; ++i)
       {
         Transform Child = iTransform.GetChild(i);
-
         if (strip(Child.name) == BoneName)
         {
           ApplyBoneTransform(Child);
@@ -436,7 +435,7 @@ namespace UnityVicon
         //Quaternion Rot = new Quaternion(-(float)ORot.Rotation[2], -(float)ORot.Rotation[0], (float)ORot.Rotation[1], (float)ORot.Rotation[3]);
         Quaternion Rot = new Quaternion((float)ORot.Rotation[0], (float)ORot.Rotation[1], (float)ORot.Rotation[2], (float)ORot.Rotation[3]);
         // mapping right hand to left hand flipping x
-        Bone.localRotation = new Quaternion(Rot.x, Rot.z, Rot.y, -Rot.w);
+        Bone.localRotation = new Quaternion(Rot.y, Rot.z, Rot.x, -Rot.w);
 
         Debug.Log($"Applied Rotation: {Bone.name} -> {Bone.localRotation}");
       }
@@ -456,7 +455,7 @@ namespace UnityVicon
       {
         Debug.Log($"Raw Vicon Translation: X={OTran.Translation[0]}, Y={OTran.Translation[1]}, Z={OTran.Translation[2]}");
         //Vector3 Translate = new Vector3(-(float)OTran.Translation[2] * 0.001f, -(float)OTran.Translation[0] * 0.001f, (float)OTran.Translation[1] * 0.001f);
-        Vector3 Translate = new Vector3((float)OTran.Translation[0] * 0.01f, (float)OTran.Translation[1] * 0.01f, (float)OTran.Translation[2] * 0.01f);
+        Vector3 Translate = new Vector3((float)OTran.Translation[0] * 0.001f, (float)OTran.Translation[1] * 0.001f, (float)OTran.Translation[2] * 0.001f);
         Bone.localPosition = new Vector3(Translate.x, Translate.z, Translate.y);
 
                 Debug.Log($"Applied Translation: {Bone.name} -> {Bone.localPosition}");

@@ -322,13 +322,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 020c4feeeeb73da4793f9862ddd12700, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  myPos: {x: 0, y: 2, z: -3}
-  myPlay: {fileID: 1046894846}
---- !u!4 &1046894846 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 431247075847058747, guid: 56186ccf27ad7864681108ed88349071, type: 3}
-  m_PrefabInstance: {fileID: 1771957973}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1184761087
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -496,7 +489,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e00898c33756f94caafd87ca8fda2f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SubjectName: Hand
+  SubjectName: HandPablo3
   Client: {fileID: 1184761088}
 --- !u!1 &1771957976 stripped
 GameObject:
