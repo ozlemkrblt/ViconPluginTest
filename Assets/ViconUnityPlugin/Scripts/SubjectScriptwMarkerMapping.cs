@@ -9,7 +9,10 @@ using System.IO;
 
 using ViconDataStreamSDK.CSharp;
 
-public class SubjectScript : MonoBehaviour
+namespace UnityVicon
+{
+
+public class SubjectScriptwMarkerMapping : MonoBehaviour
 {
   public string SubjectName = "";
 
@@ -46,7 +49,7 @@ public class SubjectScript : MonoBehaviour
   {"R_Palm", "R_Wrist"},
   // Add more mappings as necessary
 };
-  public SubjectScript()
+  public SubjectScriptwMarkerMapping()
   {
   }
 
