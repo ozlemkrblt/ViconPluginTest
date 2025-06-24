@@ -1,93 +1,75 @@
-Assets/Scenes.meta
-Assets/ViconUnityPlugin.meta
-Assets/Scenes/SampleScene.unity
-Assets/Scenes/SampleScene.unity.meta
-Assets/ViconUnityPlugin/Materials.meta
-Assets/ViconUnityPlugin/Plugins.meta
-Assets/ViconUnityPlugin/Prefab.meta
-Assets/ViconUnityPlugin/PropMeshes.meta
-Assets/ViconUnityPlugin/Scenes.meta
-Assets/ViconUnityPlugin/Scripts.meta
-Assets/ViconUnityPlugin/ViconSkins.meta
-Assets/ViconUnityPlugin/Materials/primitives.mat
-Assets/ViconUnityPlugin/Materials/primitives.mat.meta
-Assets/ViconUnityPlugin/Materials/welcomebmp.mat
-Assets/ViconUnityPlugin/Materials/welcomebmp.mat.meta
-Assets/ViconUnityPlugin/Materials/welcomebmp.png
-Assets/ViconUnityPlugin/Materials/welcomebmp.png.meta
-Assets/ViconUnityPlugin/Plugins/boost_chrono-vc140-mt-x64-1_68.dll
-Assets/ViconUnityPlugin/Plugins/boost_chrono-vc140-mt-x64-1_68.dll.meta
-Assets/ViconUnityPlugin/Plugins/boost_filesystem-vc140-mt-x64-1_68.dll
-Assets/ViconUnityPlugin/Plugins/boost_filesystem-vc140-mt-x64-1_68.dll.meta
-Assets/ViconUnityPlugin/Plugins/boost_python27-vc140-mt-x64-1_68.dll
-Assets/ViconUnityPlugin/Plugins/boost_python27-vc140-mt-x64-1_68.dll.meta
-Assets/ViconUnityPlugin/Plugins/boost_system-vc140-mt-x64-1_68.dll
-Assets/ViconUnityPlugin/Plugins/boost_system-vc140-mt-x64-1_68.dll.meta
-Assets/ViconUnityPlugin/Plugins/boost_thread-vc140-mt-x64-1_68.dll
-Assets/ViconUnityPlugin/Plugins/boost_thread-vc140-mt-x64-1_68.dll.meta
-Assets/ViconUnityPlugin/Plugins/Client.cs
-Assets/ViconUnityPlugin/Plugins/Client.cs.meta
-Assets/ViconUnityPlugin/Plugins/HmdFusionUtils_Unity.dll
-Assets/ViconUnityPlugin/Plugins/HmdFusionUtils_Unity.dll.meta
-Assets/ViconUnityPlugin/Plugins/HmdFusionUtils.cs
-Assets/ViconUnityPlugin/Plugins/HmdFusionUtils.cs.meta
-Assets/ViconUnityPlugin/Plugins/Outputs.cs
-Assets/ViconUnityPlugin/Plugins/Outputs.cs.meta
-Assets/ViconUnityPlugin/Plugins/RetimingClient.cs
-Assets/ViconUnityPlugin/Plugins/RetimingClient.cs.meta
-Assets/ViconUnityPlugin/Plugins/ViconDataStreamSDK_C.dll
-Assets/ViconUnityPlugin/Plugins/ViconDataStreamSDK_C.dll.meta
-Assets/ViconUnityPlugin/Plugins/ViconDataStreamSDK_CPP.dll
-Assets/ViconUnityPlugin/Plugins/ViconDataStreamSDK_CPP.dll.meta
-Assets/ViconUnityPlugin/Plugins/ViconDataStreamSDK_DotNET.dll
-Assets/ViconUnityPlugin/Plugins/ViconDataStreamSDK_DotNET.dll.meta
-Assets/ViconUnityPlugin/Plugins/ViconPluginUtils.asmdef
-Assets/ViconUnityPlugin/Plugins/ViconPluginUtils.asmdef.meta
-Assets/ViconUnityPlugin/Prefab/HMDPrefab.prefab
-Assets/ViconUnityPlugin/Prefab/HMDPrefab.prefab.meta
-Assets/ViconUnityPlugin/Prefab/ViconDataStreamPrefab.prefab
-Assets/ViconUnityPlugin/Prefab/ViconDataStreamPrefab.prefab.meta
-Assets/ViconUnityPlugin/PropMeshes/Flashlight.fbx
-Assets/ViconUnityPlugin/PropMeshes/Flashlight.fbx.meta
-Assets/ViconUnityPlugin/PropMeshes/Katana.fbx
-Assets/ViconUnityPlugin/PropMeshes/Katana.fbx.meta
-Assets/ViconUnityPlugin/PropMeshes/Raygun.fbx
-Assets/ViconUnityPlugin/PropMeshes/Raygun.fbx.meta
-Assets/ViconUnityPlugin/PropMeshes/ViconPulsar.fbx
-Assets/ViconUnityPlugin/PropMeshes/ViconPulsar.fbx.meta
-Assets/ViconUnityPlugin/Scenes/ViconHMDScriptExample.unity
-Assets/ViconUnityPlugin/Scenes/ViconHMDScriptExample.unity.meta
-Assets/ViconUnityPlugin/Scenes/ViconSubjectScriptExample.unity
-Assets/ViconUnityPlugin/Scenes/ViconSubjectScriptExample.unity.meta
-Assets/ViconUnityPlugin/Scripts/HMDScript.cs
-Assets/ViconUnityPlugin/Scripts/HMDScript.cs.meta
-Assets/ViconUnityPlugin/Scripts/MyScripts.meta
-Assets/ViconUnityPlugin/Scripts/RBScript.cs.meta
-Assets/ViconUnityPlugin/Scripts/Scripts.asmdef
-Assets/ViconUnityPlugin/Scripts/Scripts.asmdef.meta
-Assets/ViconUnityPlugin/Scripts/SubjectScript.cs.meta
-Assets/ViconUnityPlugin/Scripts/ViconDataStreamClient.cs.meta
-Assets/ViconUnityPlugin/ViconSkins/ViconFemale.fbx
-Assets/ViconUnityPlugin/ViconSkins/ViconFemale.fbx.meta
-Assets/ViconUnityPlugin/ViconSkins/ViconFemaleEvoke.fbm.meta
-Assets/ViconUnityPlugin/ViconSkins/ViconFemaleEvoke.fbx
-Assets/ViconUnityPlugin/ViconSkins/ViconFemaleEvoke.fbx.meta
-Assets/ViconUnityPlugin/ViconSkins/ViconFemaleFingers.fbx
-Assets/ViconUnityPlugin/ViconSkins/ViconFemaleFingers.fbx.meta
-Assets/ViconUnityPlugin/ViconSkins/ViconMale.fbx
-Assets/ViconUnityPlugin/ViconSkins/ViconMale.fbx.meta
-Assets/ViconUnityPlugin/ViconSkins/ViconMaleEvoke.fbm.meta
-Assets/ViconUnityPlugin/ViconSkins/ViconMaleEvoke.fbx
-Assets/ViconUnityPlugin/ViconSkins/ViconMaleEvoke.fbx.meta
-Assets/ViconUnityPlugin/ViconSkins/ViconMaleFingers.fbx
-Assets/ViconUnityPlugin/ViconSkins/ViconMaleFingers.fbx.meta
-Assets/ViconUnityPlugin/ViconSkins/ViconFemaleEvoke.fbm/ViconFemale_006_TXTR_EvokeMiddle.png
-Assets/ViconUnityPlugin/ViconSkins/ViconFemaleEvoke.fbm/ViconFemale_006_TXTR_EvokeMiddle.png.meta
-Assets/ViconUnityPlugin/ViconSkins/ViconMaleEvoke.fbm/Viconman_005_4K_TXTR_EvokeMiddle.png
-Assets/ViconUnityPlugin/ViconSkins/ViconMaleEvoke.fbm/Viconman_005_4K_TXTR_EvokeMiddle.png.meta
-Library/
-Logs/
-Packages/
-ProjectSettings/
-Temp/
-UserSettings/
+# This .gitignore file should be placed at the root of your Unity project directory
+#
+# Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
+#
+.utmp/
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+*.log
+
+# MemoryCaptures can get excessive in size.
+# They also could contain extremely sensitive data
+/[Mm]emoryCaptures/
+
+# Recordings can get excessive in size
+/[Rr]ecordings/
+
+# Uncomment this line if you wish to ignore the asset store tools plugin
+# /[Aa]ssets/AssetStoreTools*
+
+# Autogenerated Jetbrains Rider plugin
+/[Aa]ssets/Plugins/Editor/JetBrains*
+
+# Visual Studio cache directory
+.vs/
+
+# Gradle cache directory
+.gradle/
+
+# Autogenerated VS/MD/Consulo solution and project files
+ExportedObj/
+.consulo/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Unity3D generated meta files
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Unity3D generated file on crash reports
+sysinfo.txt
+
+# Builds
+*.apk
+*.aab
+*.unitypackage
+*.unitypackage.meta
+*.app
+
+# Crashlytics generated file
+crashlytics-build.properties
+
+# Packed Addressables
+/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+
+# Temporary auto-generated Android Assets
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*

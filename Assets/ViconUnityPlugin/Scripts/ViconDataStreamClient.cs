@@ -117,7 +117,8 @@ public class ViconDataStreamClient : MonoBehaviour
     //     print("Configured adapter for wireless settings");
     //   }
     // }
-    print("Vicon Client Connected: " + m_Client.IsConnected());
+ 
+
     print("Starting...");
     Output_GetVersion OGV = m_Client.GetVersion(); //Retrieves and prints the Vicon DataStream SDK version.
     print("Using Datastream version " + OGV.Major + "." + OGV.Minor + "." + OGV.Point + "." + OGV.Revision);
@@ -251,6 +252,7 @@ public class ViconDataStreamClient : MonoBehaviour
     {
       Output_Connect OC = m_Client.Connect(CombinedHostnameString);
       print("Connect result: " + OC.Result);
+      print("Connected by using Vicon DataStream client.");
 
       System.Threading.Thread.Sleep(200);
     }
@@ -428,6 +430,18 @@ public class ViconDataStreamClient : MonoBehaviour
 
   }
 
+  public Output_GetSegmentStaticRotationQuaternion GetSegmentStaticRotationQuaternion(string SubjectName, string SegmentName)
+  {
+    if (IsRetimed)
+    {
+      return m_RetimingClient.GetSegmentStaticRotationQuaternion(SubjectName, SegmentName);
+    }
+    else
+    {
+      return m_Client.GetSegmentStaticRotationQuaternion(SubjectName, SegmentName);
+    }
+  }
+
   /**
   * Gets the local translation(position data) of a specified segment for a given subject.
   * @param SubjectName The name of the subject.
@@ -445,6 +459,18 @@ public class ViconDataStreamClient : MonoBehaviour
       return m_Client.GetSegmentLocalTranslation(SubjectName, SegmentName);
     }
 
+  }
+
+  public Output_GetSegmentStaticTranslation GetSegmentStaticTranslation(string SubjectName, string SegmentName)
+  {
+    if (IsRetimed)
+    {
+      return m_RetimingClient.GetSegmentStaticTranslation(SubjectName, SegmentName);
+    }
+    else
+    {
+      return m_Client.GetSegmentStaticTranslation(SubjectName, SegmentName);
+    }
   }
   /**
   * Gets the static scale of a specified segment for a given subject.
@@ -560,7 +586,6 @@ public class ViconDataStreamClient : MonoBehaviour
   * @param MarkerIndex The index of the marker.
   * @return The name of the marker.
   **/
-
 
   public Output_GetMarkerCount GetMarkerCount(string SubjectName)
   {
