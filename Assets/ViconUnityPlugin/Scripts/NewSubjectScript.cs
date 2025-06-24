@@ -23,6 +23,9 @@ namespace UnityVicon
         private Vector3 m_LastGoodPosition;
         private bool m_bHasCachedPose = false;
         public Vector3 PositionOffset = Vector3.zero; // Default to no offset
+
+        private string m_RootSegmentName;
+
         public NewSubjectScript()
         {
         }
@@ -55,6 +58,8 @@ namespace UnityVicon
             }
 
             Output_GetSubjectRootSegmentName OGSRSN = Client.GetSubjectRootSegmentName(SubjectName);
+            m_RootSegmentName = OGSRSN.SegmentName;
+
             if (OGSRSN.Result != Result.Success)
             {
                 Debug.LogError("Failed to get root segment name.");
@@ -179,7 +184,9 @@ namespace UnityVicon
               -Rot.w   // W stays the same
           );
 
-                if (Bone.parent != null)
+                if (Bone.parent != null 
+                //&& Bone.name != m_RootSegmentName
+                )
                 {
                     Bone.localRotation = Quaternion.Inverse(Bone.parent.rotation) * globalRot;
                     Debug.Log($"Applying Local Rotation: {Bone.name} -> {Bone.localRotation}");
@@ -196,7 +203,9 @@ namespace UnityVicon
             else if (m_bHasCachedPose)
             {
                 Debug.LogWarning("Vicon data is occluded, using last good pose");
-                if (Bone.parent != null)
+                if (Bone.parent != null 
+                //&& Bone.name != m_RootSegmentName
+                )
                 {
                     Bone.localRotation = Quaternion.Inverse(Bone.parent.rotation) * m_LastGoodRotation;
                 }
@@ -231,7 +240,7 @@ namespace UnityVicon
 
                 //Corrected Mapping for Unity
                 Vector3 globalPosition = new Vector3(
-                     Translate.x,  // Vicon X → Unity X
+                     -Translate.x,  // Vicon X → Unity X
                      Translate.z,   // Vicon Z → Unity Y
                      Translate.y    // Vicon Y → Unity Z
                   );
@@ -240,7 +249,9 @@ namespace UnityVicon
 
 
 
-                if (Bone.parent != null)
+                if (Bone.parent != null 
+                //&& BoneName != m_RootSegmentName
+                )
                 {
                     Bone.localPosition = Bone.parent.InverseTransformPoint(globalPosition);
                     Debug.Log($"Applying Local Position: {Bone.name} -> {Bone.localPosition}");
@@ -255,7 +266,9 @@ namespace UnityVicon
             else if (m_bHasCachedPose)
             {
                 Debug.LogWarning("Vicon data is occluded, using last good pose");
-                if (Bone.parent != null)
+                if (Bone.parent != null 
+                //&& Bone.name != m_RootSegmentName
+                )
                 {
                     Bone.localPosition = Bone.parent.InverseTransformPoint(m_LastGoodPosition);
                 }

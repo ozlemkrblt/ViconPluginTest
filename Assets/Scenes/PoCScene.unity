@@ -564,6 +564,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SubjectName: PoC
   Client: {fileID: 191743588}
+  PositionOffset: {x: 0, y: 0, z: -1}
 --- !u!1 &1990914491
 GameObject:
   m_ObjectHideFlags: 0
