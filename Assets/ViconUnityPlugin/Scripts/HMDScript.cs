@@ -156,8 +156,11 @@ public class HMDScript : BasePoseProvider
             // headset to unity
             ViconOrientation = ViconInHMD.Rotation;
             ViconPosition = ViconInHMD.Position;
-            HMDUtils.FusionService.Quat Rotation = new HMDUtils.FusionService.Quat(-ViconOrientation.X, -ViconOrientation.Y, ViconOrientation.Z, ViconOrientation.W);
-            HMDUtils.FusionService.Vec Position = new HMDUtils.FusionService.Vec(ViconPosition.X, ViconPosition.Y, -ViconPosition.Z);
+            HMDUtils.FusionService.Quat Rotation = new HMDUtils.FusionService.Quat(ViconOrientation.X, ViconOrientation.Z, ViconOrientation.Y, ViconOrientation.W);
+            HMDUtils.FusionService.Vec Position = new HMDUtils.FusionService.Vec(ViconPosition.X, ViconPosition.Y, ViconPosition.Z);
+            Debug.Log($"Mapped Vicon Rotation: {Rotation.X}, {Rotation.Y}, {Rotation.Z}, {Rotation.W}");
+            Debug.Log($"Mapped Vicon Position: {Position.X}, {Position.Y}, {Position.Z}");
+
             HMDUtils.FusionService.Pose ViconInUnity = new HMDUtils.FusionService.Pose(Position, Rotation);
 
             HMDUtils.FusionService.Quat HmdOrtUnity = new HMDUtils.FusionService.Quat( 0, 0, 0, 1 ); 
@@ -208,6 +211,8 @@ public class HMDScript : BasePoseProvider
             }
             // Not sure whether we actually require this, plus XR doesn't give it.
             double HmdTime = 0;
+            HMDUtils.FusionService.Quat Output = new HMDUtils.FusionService.Quat(0, 0, 0, 1);
+
 
             if ( m_Service != null)
             {
@@ -224,7 +229,7 @@ public class HMDScript : BasePoseProvider
                   FusionState = HMDUtils.FusionService.MathUtilsError.ESuccess;
                 }
 
-                HMDUtils.FusionService.Quat Output = new HMDUtils.FusionService.Quat(0,0,0,1);
+                Output = new HMDUtils.FusionService.Quat(0,0,0,1);
 
                 if (FusionState == HMDUtils.FusionService.MathUtilsError.ESuccess)
                 {
@@ -260,8 +265,13 @@ public class HMDScript : BasePoseProvider
 
                 if ( FusionState == HMDUtils.FusionService.MathUtilsError.ESuccess )
                 {
+                    //output = new Pose(Adapt(ViconInUnity.Position), Adapt(Output));
+
+                    //return PoseDataFlags.Position | PoseDataFlags.Rotation;
                     output = new Pose(Adapt(ViconInUnity.Position), Adapt(Output));
+                    Debug.Log("✅ Using mapped pose directly (bypassed fallback)");
                     return PoseDataFlags.Position | PoseDataFlags.Rotation;
+
                 }
 
             }
@@ -273,9 +283,11 @@ public class HMDScript : BasePoseProvider
             }
             else
             {
+                m_LastGoodPose = new HMDUtils.FusionService.Pose(ViconInUnity.Position, Output);
                 output = new Pose(Adapt(m_LastGoodPose.Position), Adapt(m_LastGoodPose.Rotation));
                 Debug.LogWarning("using last postion");
                 return PoseDataFlags.Position | PoseDataFlags.Rotation;
+
             }
         }
         catch (DllNotFoundException ex)
