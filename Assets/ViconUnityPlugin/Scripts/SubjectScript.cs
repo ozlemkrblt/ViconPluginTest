@@ -8,10 +8,8 @@ using System.IO;
 
 using ViconDataStreamSDK.CSharp;
 
-namespace UnityVicon
+namespace ViconPluginTest
 {
-
-
     public class SubjectScript : MonoBehaviour
     {
         public string SubjectName = "";
@@ -216,7 +214,7 @@ namespace UnityVicon
                 //Bone.localRotation = new Quaternion(Rot.x, -Rot.y, -Rot.z, Rot.w);
                 Bone.localRotation = new Quaternion(
               Rot.y,  // Vicon Y → Unity X (negated)
-              - Rot.z,  // Vicon Z → Unity Y
+              -Rot.z,  // Vicon Z → Unity Y
               -Rot.x,  // Vicon X → Unity Z (negated)
               -Rot.w   // W stays the same
           );

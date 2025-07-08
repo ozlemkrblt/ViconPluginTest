@@ -46,7 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HostName: localhost
   Port: 801
-  SubjectFilter: RB
+  SubjectFilter: 
   UsePreFetch: 0
   IsRetimed: 0
   Offset: 0
