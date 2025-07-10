@@ -2,7 +2,7 @@
 
 ## 📌 Overview
 
-This branch explores ways to **leverage Unity’s XR Hands package**, particularly the `XRHandSubsystem`, to integrate some of its functionality with a **custom motion tracking setup powered by Vicon Nexus**.
+This branch explores ways to **leverage Unity’s XR Hands package**, particularly the `XRSubsystem`, to integrate some of its functionality with a **custom motion tracking setup powered by Vicon Nexus**.
 
 The main goal is to experiment with combining Unity’s built-in hand tracking interfaces—originally designed for XR devices like the Meta Quest—with **marker-based motion capture data** coming from Vicon. This could enable high-fidelity skeletal hand interactions in VR or AR experiences while maintaining the flexibility of external tracking systems.
 
@@ -10,20 +10,20 @@ The main goal is to experiment with combining Unity’s built-in hand tracking i
 
 ## 🚀 Goals
 
-* Interface Vicon-captured hand data with Unity's `XRHandSubsystem`.
+* Interface Vicon-captured hand data with Unity's `XRSubsystem`.
 * Reuse Unity’s `XRHand`, `XRHandJoint`, and related logic for rendering, animation, or physics.
 * Extend XR-compatible input handling to Vicon-driven skeletons.
 * Prototype a hybrid approach where external hand tracking (Vicon) can substitute or override XR device input.
 
 ---
 
-## 🧱 About `XRHandSubsystem`
+## 🧱 About `XRSubsystem`
 
-The `XRHandSubsystem` is part of Unity's [XR Hands](https://docs.unity3d.com/Packages/com.unity.xr.hands@latest) package. It provides a platform-agnostic abstraction for hand tracking, with implementations for devices like Meta Quest.
+The `XRSubsystem` is part of Unity's [XR Hands](https://docs.unity3d.com/Packages/com.unity.xr.hands@latest) package. It provides a platform-agnostic abstraction for hand tracking, with implementations for devices like Meta Quest.
 
 ### Key Components
 
-* **`XRHandSubsystem`**
+* **`XRSubsystem`**
   Core subsystem responsible for updating hand data (left/right) each frame.
 
 * **`XRHand`**
@@ -42,7 +42,7 @@ The `XRHandSubsystem` is part of Unity's [XR Hands](https://docs.unity3d.com/Pac
 The proposed integration involves:
 
 1. **Custom XR Provider (optional)**
-   Extending or mocking an `XRHandSubsystem` provider to inject Vicon-driven hand joint data directly into the XRHands system.
+   Extending or mocking an `XRSubsystem` provider to inject Vicon-driven hand joint data directly into the XRHands system.
 
 2. **Mapping Vicon Joint Data → `XRHandJoint`s**
    Translating Vicon segment transforms into Unity joint poses compatible with XRHands.
