@@ -1,11 +1,13 @@
 {
     "name": "Scripts",
+    "rootNamespace": "",
     "references": [
         "Unity.XR.OpenVR",
-        "UnityEngine.SpatialTracking",
+        "GUID:ba171b3dd2a51234ab864770f99741a5",
         "UnityEngine.Experimental.XR.Interaction",
         "UnityEngine.Experimental.XR.Interaction.Editor",
-        "ViconPluginUtils"
+        "GUID:6917fa79a89227240a18c7fa8050131b",
+        "GUID:75469ad4d38634e559750d17036d5f7c"
     ],
     "includePlatforms": [],
     "excludePlatforms": [

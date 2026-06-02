@@ -1,11 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using UnityEngine;
+using UnityEngine.InputSystem; // For keyboard input in debug trigger
 using ViconDataStreamSDK.CSharp;
-using static PlasticGui.LaunchDiffParameters;
 
 /// 
 /// NewSubjectScript extends the functionality of SubjectScript by:
@@ -28,16 +24,12 @@ namespace UnityVicon
         public ViconDataStreamClient Client;
 
         //Added for caching the last good pose
-        private Quaternion m_LastGoodRotation;
-        private Vector3 m_LastGoodPosition;
-        private bool m_bHasCachedPose = false;
+        private Dictionary<string, Quaternion> m_LastGoodRotations = new Dictionary<string, Quaternion>();
+        private Dictionary<string, Vector3> m_LastGoodPositions = new Dictionary<string, Vector3>();
+
         public Vector3 PositionOffset = Vector3.zero; // Default to no offset , added to SubjectScript.cs
 
         private string m_RootSegmentName; // New:  used in transform logic to distinguish root from child segments
-
-        public NewSubjectScript()
-        {
-        }
 
         void LateUpdate()
         {
@@ -115,16 +107,35 @@ namespace UnityVicon
             FindAndTransform(Root, OGSRSN.SegmentName);
 
             //DEBUGGING
-            uint SubjectCount = Client.GetSubjectCount().SubjectCount;
-            Debug.Log($"Total Subjects in Vicon: {SubjectCount}");
+            //uint SubjectCount = Client.GetSubjectCount().SubjectCount;
+            //Debug.Log($"Total Subjects in Vicon: {SubjectCount}");
 
-            for (uint i = 0; i < SubjectCount; i++)
+            //for (uint i = 0; i < SubjectCount; i++)
+            //{
+            //    string currentSubjectName = Client.GetSubjectName(i).SubjectName;
+            //    Debug.Log($"Subject {i}: {currentSubjectName}"); 
+            //}
+
+            //PrintMarkerData();
+
+            if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
             {
-                string currentSubjectName = Client.GetSubjectName(i).SubjectName;
-                Debug.Log($"Subject {i}: {currentSubjectName}");
-            }
+                Debug.Log("--- MANUAL DEBUG TRIGGERED ---");
 
-            PrintMarkerData();
+                print("Subject Segment Hierarchy:");
+                DebugHierarchy(Root);
+
+                uint SubjectCount = Client.GetSubjectCount().SubjectCount;
+                Debug.Log($"Total Subjects in Vicon: {SubjectCount}");
+
+                for (uint i = 0; i < SubjectCount; i++)
+                {
+                    string currentSubjectName = Client.GetSubjectName(i).SubjectName;
+                    Debug.Log($"Subject {i}: {currentSubjectName}");
+                }
+
+                PrintMarkerData();
+            }
         }
 
         string strip(string BoneName)
@@ -176,6 +187,8 @@ namespace UnityVicon
         {
             string BoneName = strip(Bone.gameObject.name);
 
+            // --- ROTATION ---
+
             Output_GetSegmentLocalRotationQuaternion ORot = Client.GetSegmentRotation(SubjectName, BoneName);
 
             Debug.Log($"Rotation Status: {ORot.Result}");
@@ -194,7 +207,7 @@ namespace UnityVicon
           );
 
                 if (Bone.parent != null 
-                && Bone.name != m_RootSegmentName
+                && BoneName != m_RootSegmentName
                 )
                 {
                     Bone.localRotation = Quaternion.Inverse(Bone.parent.rotation) * globalRot;
@@ -206,25 +219,25 @@ namespace UnityVicon
                     Debug.Log($"Applying Rotation: {Bone.name} -> {Bone.rotation}");
                 }
 
-                m_LastGoodRotation = globalRot;
-                m_bHasCachedPose = true;
+                m_LastGoodRotations[BoneName] = globalRot;
             }
-            else if (m_bHasCachedPose) //For occluded data, uses cached pose and applies it differently for root and child segments (using parent transforms for children).
+            else if (m_LastGoodRotations.ContainsKey(BoneName)) //For occluded data, uses cached pose and applies it differently for root and child segments (using parent transforms for children).
             {
                 Debug.LogWarning("Vicon data is occluded, using last good pose");
                 if (Bone.parent != null 
                 && Bone.name != m_RootSegmentName
                 )
                 {
-                    Bone.localRotation = Quaternion.Inverse(Bone.parent.rotation) * m_LastGoodRotation;
+                    Bone.localRotation = Quaternion.Inverse(Bone.parent.rotation) * m_LastGoodRotations[BoneName];
                 }
                 else
                 {
-                    Bone.rotation = m_LastGoodRotation;
+                    Bone.rotation = m_LastGoodRotations[BoneName];
                 }
 
             }
 
+            // ----TRANSLATION----
             Output_GetSegmentLocalTranslation OTran;
             if (IsScaled)
             {
@@ -273,19 +286,21 @@ namespace UnityVicon
                     Debug.Log($"Applying Position: {Bone.name} -> {Bone.position}");
                 }
 
+                m_LastGoodPositions[BoneName] = globalPosition;
+
             }
-            else if (m_bHasCachedPose)
+            else if (m_LastGoodPositions.ContainsKey(BoneName))
             {
                 Debug.LogWarning("Vicon data is occluded, using last good pose");
                 if (Bone.parent != null 
                 && Bone.name != m_RootSegmentName
                 )
                 {
-                    Bone.localPosition = Bone.parent.InverseTransformPoint(m_LastGoodPosition);
+                    Bone.localPosition = Bone.parent.InverseTransformPoint(m_LastGoodPositions[BoneName]);
                 }
                 else
                 {
-                    Bone.rotation = m_LastGoodRotation;
+                    Bone.position = m_LastGoodPositions[BoneName];
                 }
 
             }
