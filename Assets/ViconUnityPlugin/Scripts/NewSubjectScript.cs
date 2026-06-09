@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem; // For keyboard input in debug trigger
 using ViconDataStreamSDK.CSharp;
@@ -9,17 +11,17 @@ using ViconDataStreamSDK.CSharp;
 /// - Caching the root segment name (m_RootSegmentName) for better handling of root vs. child transforms.
 /// - Applying transforms differently for root and child segments, ensuring accurate hierarchy mapping.
 /// - Improved handling of occluded data by distinguishing root and child segments during fallback.
-/// - Enhanced debug logging for better traceability.
+/// - Uses external ViconFileLogger for clean background logging.
 /// This script is more modular and robust for complex subject hierarchies.
 /// 
 
-namespace UnityVicon
+namespace Assets.ViconUnityPlugin.Scripts
 {
     public class NewSubjectScript : MonoBehaviour
     {
         public string SubjectName = "";
 
-        private bool IsScaled = true;
+        private readonly bool IsScaled = true;
 
         public ViconDataStreamClient Client;
 
@@ -31,17 +33,31 @@ namespace UnityVicon
 
         private string m_RootSegmentName; // New:  used in transform logic to distinguish root from child segments
 
+        // timer for debug
+        private bool m_SpaceTimerActive = false;
+        private float m_SpaceTimerStart = 0f;
+
+        private ViconFileLogger m_Logger; // New: instance of the ViconFileLogger to manage logging
+
+        private bool m_HasPrintedHierarchy = false; // New : flag to ensure we only print the hierarchy once for debugging
+        void Start()
+        {
+            // Initialize ViconLogger
+            m_Logger = new ViconFileLogger();
+            m_Logger.Initialize();
+        }
+
         void LateUpdate()
         {
             if (Client == null)
             {
-                Debug.LogError("Vicon Client is NULL in SubjectScript! Make sure it's initialized.");
+                Debug.LogError("[CONSOLE] Vicon Client is NULL in SubjectScript! Make sure it's initialized.");
                 return;
             }
 
             if (string.IsNullOrEmpty(SubjectName))
             {
-                Debug.LogError("SubjectName is NULL or EMPTY! Make sure it's set before calling LateUpdate.");
+                Debug.LogError("[CONSOLE] SubjectName is NULL or EMPTY! Make sure it's set before calling LateUpdate.");
                 return;
             }
 
@@ -53,7 +69,7 @@ namespace UnityVicon
             }
             else
             {
-
+                Debug.Log($"Successfully retrieved segment count for Subject '{SubjectName}'.");
                 Debug.Log($"Subject Total Segment Count: {OGSRSC.SegmentCount}");
 
             }
@@ -73,9 +89,8 @@ namespace UnityVicon
             }
             else
             {
-
+                Debug.Log($"Successfully retrieved Root Segment Name for subject '{SubjectName}'.");
                 Debug.Log($"Subject Root Segment Name: {OGSRSN.SegmentName}");
-
             }
             Transform Root = transform.root;
 
@@ -85,28 +100,18 @@ namespace UnityVicon
                 return;
             }
 
-            //DEBUGGING
-            print("Subject Segment Hiearchy:");
-            DebugHierarchy(Root);
-            Output_GetSegmentChildCount OutputGSCC = Client.GetSegmentChildCount(SubjectName, OGSRSN.SegmentName);
-            if (OutputGSCC.Result != Result.Success)
+            if (!m_HasPrintedHierarchy)
             {
-                Debug.LogError($"Failed to get segment child count: {OutputGSCC.Result}");
-                return;
-            }
-            Debug.Log($"Segment Child Count: {OutputGSCC.SegmentCount}");
+                string fullHierarchy = GetDebugHierarchy(Root);
+                Debug.Log($"[CONSOLE] Subject Segment Hierarchy: \n -------------------------- \n {fullHierarchy} \n --------------------------");
 
-            Output_GetSegmentChildName OutputGSCN = Client.GetSegmentChildName(SubjectName, OGSRSN.SegmentName, 0);
-            if (OutputGSCN.Result != Result.Success)
-            {
-                Debug.LogError($"Failed to get segment child name: {OutputGSCN.Result}");
-                return;
+                m_HasPrintedHierarchy = true;
             }
-            Debug.Log($"Segment Child Name: {OutputGSCN.SegmentName}");
 
+            //Debug here or below?
             FindAndTransform(Root, OGSRSN.SegmentName);
 
-            //DEBUGGING
+            // Checking the subject count and names in the Vicon system for debugging purposes. Can be commented out if not needed.
             //uint SubjectCount = Client.GetSubjectCount().SubjectCount;
             //Debug.Log($"Total Subjects in Vicon: {SubjectCount}");
 
@@ -116,25 +121,48 @@ namespace UnityVicon
             //    Debug.Log($"Subject {i}: {currentSubjectName}"); 
             //}
 
-            //PrintMarkerData();
-
             if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
             {
-                Debug.Log("--- MANUAL DEBUG TRIGGERED ---");
-
-                print("Subject Segment Hierarchy:");
-                DebugHierarchy(Root);
-
-                uint SubjectCount = Client.GetSubjectCount().SubjectCount;
-                Debug.Log($"Total Subjects in Vicon: {SubjectCount}");
-
-                for (uint i = 0; i < SubjectCount; i++)
+                if (!m_SpaceTimerActive)
                 {
-                    string currentSubjectName = Client.GetSubjectName(i).SubjectName;
-                    Debug.Log($"Subject {i}: {currentSubjectName}");
+                    // --- TURN ON ---
+                    m_SpaceTimerActive = true;
+                    m_SpaceTimerStart = Time.realtimeSinceStartup;
+
+                    Debug.Log("[CONSOLE] --- MANUAL DEBUG TRIGGERED ---"); //ADD SPECIAL TAG TO MAKE THIS STAND OUT IN THE LOGS
+                    Debug.Log($"[CONSOLE] Logs located at:{Application.persistentDataPath}");
+                    m_Logger.AppendLog($"START,{DateTime.Now:O},{m_SpaceTimerStart:F6}");
+                }
+                else
+                {
+                    m_SpaceTimerActive = false;
+                    float elapsed = Time.realtimeSinceStartup - m_SpaceTimerStart;
+
+                    Debug.Log("[CONSOLE] --- MANUAL DEBUG FINISHED ---"); //ADD SPECIAL TAG TO MAKE THIS STAND OUT IN THE LOGS
+                    Debug.Log($"Timer STOPPED. Elapsed: {elapsed:F6} seconds");
+                    m_Logger.AppendLog($"STOP,{DateTime.Now:O},{elapsed:F6}");
                 }
 
+                Output_GetSegmentChildCount OutputGSCC = Client.GetSegmentChildCount(SubjectName, OGSRSN.SegmentName);
+                if (OutputGSCC.Result != Result.Success)
+                {
+                    Debug.LogError($"Failed to get segment child count: {OutputGSCC.Result}");
+                    return;
+                }
+                Debug.Log($"Segment Child Count: {OutputGSCC.SegmentCount}");
+
+                Output_GetSegmentChildName OutputGSCN = Client.GetSegmentChildName(SubjectName, OGSRSN.SegmentName, 0);
+                if (OutputGSCN.Result != Result.Success)
+                {
+                    Debug.LogError($"Failed to get segment child name: {OutputGSCN.Result}");
+                    return;
+                }
+                Debug.Log($"Segment Child Name: {OutputGSCN.SegmentName}");
+
+                Debug.Log("--------------------------");
+                Debug.Log("Marker Data:");
                 PrintMarkerData();
+                Debug.Log("--------------------------");
             }
         }
 
@@ -157,7 +185,7 @@ namespace UnityVicon
             for (int i = 0; i < ChildCount; ++i)
             {
                 Transform Child = iTransform.GetChild(i);
-                Debug.Log($"Checking child name: {Child.name}"); // Log all child names to check against BoneName
+                Debug.Log($"Checking child name: {Child.name}");
 
                 if (strip(Child.name) == BoneName)
                 {
@@ -206,7 +234,7 @@ namespace UnityVicon
               -Rot.w   // W stays the same
           );
 
-                if (Bone.parent != null 
+                if (Bone.parent != null
                 && BoneName != m_RootSegmentName
                 )
                 {
@@ -224,7 +252,7 @@ namespace UnityVicon
             else if (m_LastGoodRotations.ContainsKey(BoneName)) //For occluded data, uses cached pose and applies it differently for root and child segments (using parent transforms for children).
             {
                 Debug.LogWarning("Vicon data is occluded, using last good pose");
-                if (Bone.parent != null 
+                if (Bone.parent != null
                 && Bone.name != m_RootSegmentName
                 )
                 {
@@ -269,11 +297,11 @@ namespace UnityVicon
 
                 globalPosition += PositionOffset;
 
-            //Applies rotation and position differently for root vs. child segments:
-            //  •	For root: sets Bone.rotation and Bone.position.
-            //  •	For children: sets Bone.localRotation and Bone.localPosition using parent transforms.
+                //Applies rotation and position differently for root vs. child segments:
+                //  •	For root: sets Bone.rotation and Bone.position.
+                //  •	For children: sets Bone.localRotation and Bone.localPosition using parent transforms.
 
-                if (Bone.parent != null 
+                if (Bone.parent != null
                 && BoneName != m_RootSegmentName
                 )
                 {
@@ -292,7 +320,7 @@ namespace UnityVicon
             else if (m_LastGoodPositions.ContainsKey(BoneName))
             {
                 Debug.LogWarning("Vicon data is occluded, using last good pose");
-                if (Bone.parent != null 
+                if (Bone.parent != null
                 && Bone.name != m_RootSegmentName
                 )
                 {
@@ -319,18 +347,6 @@ namespace UnityVicon
 
         private void PrintMarkerData()
         {
-            if (Client == null)
-            {
-                Debug.LogError("Vicon Client is NULL!");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(SubjectName))
-            {
-                Debug.LogError("SubjectName is not set!");
-                return;
-            }
-
             // Count the number of markers
             uint MarkerCount = Client.GetMarkerCount(SubjectName).MarkerCount;
             Debug.Log($"Marker count for {SubjectName}: {MarkerCount}\n");
@@ -356,18 +372,32 @@ namespace UnityVicon
         }
 
 
-        void DebugHierarchy(Transform root, int depth = 0)
+        string GetDebugHierarchy(Transform root)
         {
+            StringBuilder sb = new StringBuilder();
+            BuildHierarchyString(root, sb, 0);
+            return sb.ToString(); // Returns the completely built string
+        }
 
+        void BuildHierarchyString(Transform root, StringBuilder sb, int depth)
+        {
             string indent = new string('-', depth * 2);
-            Debug.Log($"{indent} {root.name} (Children: {root.childCount})");
+
+            // AppendLine adds the text and automatically drops down to the next line
+            sb.AppendLine($"{indent} {root.name} (Children: {root.childCount})");
 
             for (int i = 0; i < root.childCount; i++)
             {
-                DebugHierarchy(root.GetChild(i), depth + 1);
+                BuildHierarchyString(root.GetChild(i), sb, depth + 1);
             }
         }
 
 
+        void OnDestroy()
+        {
+            // Make sure the logger correctly restores the Unity console and frees the file when the script
+            // is destroyed
+            m_Logger?.Dispose();
+        }
     } //end of program
 }// end of namespace
