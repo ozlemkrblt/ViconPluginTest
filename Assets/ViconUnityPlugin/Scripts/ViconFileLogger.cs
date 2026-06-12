@@ -7,10 +7,8 @@ namespace Assets.ViconUnityPlugin.Scripts
     /*
     Handles intercepting Unity Debug.Log messages and rotuing them to a safe file,
     while optionally passing specific logs back to the main Unity console. 
-    Having a log file for every trial is efficienter and easier to track the data. 
+    Having a log file for every trial is more efficient and easier to track the data. 
     */
-
-
     public class ViconFileLogger : IDisposable
     {
         private string m_DebugLogPath;
@@ -44,12 +42,12 @@ namespace Assets.ViconUnityPlugin.Scripts
                     File.AppendAllText(m_DebugLogPath, $"# Debug log at {DateTime.Now:O}{Environment.NewLine}");
                 }
 
-                // Subscribe to Unity log events so every Debug.Log/Warning/Error is captured
-                Application.logMessageReceived += HandleUnityLog;
-                Application.logMessageReceivedThreaded += HandleUnityLog;
+                //// Subscribe to Unity log events so every Debug.Log/Warning/Error is captured
+                //Application.logMessageReceived += HandleUnityLog;
+                //Application.logMessageReceivedThreaded += HandleUnityLog;
 
                 // Set the static forward to our instance method
-                s_ForwardLog = HandleUnityLog;
+                //s_ForwardLog = HandleUnityLog;
 
                 // Swap out the Unity Log Handler
                 m_OldLogHandler = Debug.unityLogger.logHandler;
@@ -77,42 +75,43 @@ namespace Assets.ViconUnityPlugin.Scripts
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[CONSOLE] Failed to write debug log: {ex}");
-            }
-
-        }
-
-
-        private void HandleUnityLog(string condition, string stackTrace, LogType type)
-        {
-            if (string.IsNullOrEmpty(m_DebugLogPath))
-                return;
-
-            string time = DateTime.Now.ToString("O");
-            string line = $"LOG,{time},{type},{condition}";
-            if (type == LogType.Exception || type == LogType.Error)
-            {
-                line += $"{Environment.NewLine}STACKTRACE: {stackTrace}";
-            }
-
-            try
-            {
-                lock (m_FileLock)
-                {
-                    File.AppendAllText(m_DebugLogPath, line + Environment.NewLine);
-                }
-            }
-            catch (Exception ex)
-            {
+                //Debug.LogError($"[CONSOLE] Failed to write debug log: {ex}");
                 Debug.unityLogger.LogError("ViconFileLogger", $"Failed to write to log file: {ex}");
             }
+
         }
+
+
+        //private void HandleUnityLog(string condition, string stackTrace, LogType type)
+        //{
+        //    if (string.IsNullOrEmpty(m_DebugLogPath))
+        //        return;
+
+        //    string time = DateTime.Now.ToString("O");
+        //    string line = $"LOG,{time},{type},{condition}";
+        //    if (type == LogType.Exception || type == LogType.Error)
+        //    {
+        //        line += $"{Environment.NewLine}STACKTRACE: {stackTrace}";
+        //    }
+
+        //    try
+        //    {
+        //        lock (m_FileLock)
+        //        {
+        //            File.AppendAllText(m_DebugLogPath, line + Environment.NewLine);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Debug.unityLogger.LogError("ViconFileLogger", $"Failed to write to log file: {ex}");
+        //    }
+        //}
 
         public void Dispose()
         {
-            // Unsubscribe from Unity log events
-            Application.logMessageReceived -= HandleUnityLog;
-            Application.logMessageReceivedThreaded -= HandleUnityLog;
+            //// Unsubscribe from Unity log events
+            //Application.logMessageReceived -= HandleUnityLog;
+            //Application.logMessageReceivedThreaded -= HandleUnityLog;
 
             // Restore original log handler so Unity behaves normally after destruction
             if (m_OldLogHandler != null)
