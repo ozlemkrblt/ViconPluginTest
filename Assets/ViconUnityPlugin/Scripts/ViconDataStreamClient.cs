@@ -430,7 +430,20 @@ public class ViconDataStreamClient : MonoBehaviour
 
   }
 
-  public Output_GetSegmentStaticRotationQuaternion GetSegmentStaticRotationQuaternion(string SubjectName, string SegmentName)
+
+    public Output_GetSegmentGlobalRotationQuaternion GetSegmentGlobalRotationQuaternion(string SubjectName, string SegmentName)
+    {
+        if (IsRetimed)
+        {
+            return m_RetimingClient.GetSegmentGlobalRotationQuaternion(SubjectName, SegmentName);
+        }
+        else
+        {
+            return m_Client.GetSegmentGlobalRotationQuaternion(SubjectName, SegmentName);
+        }
+    }
+
+    public Output_GetSegmentStaticRotationQuaternion GetSegmentStaticRotationQuaternion(string SubjectName, string SegmentName)
   {
     if (IsRetimed)
     {

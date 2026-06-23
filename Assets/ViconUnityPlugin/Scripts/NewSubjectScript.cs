@@ -21,7 +21,8 @@ namespace Assets.ViconUnityPlugin.Scripts
     {
         public string SubjectName = "";
 
-        private readonly bool IsScaled = true;
+        // set it to false
+        private readonly bool IsScaled = false;
 
         public ViconDataStreamClient Client;
 
@@ -217,7 +218,8 @@ namespace Assets.ViconUnityPlugin.Scripts
 
             // --- ROTATION ---
 
-            Output_GetSegmentLocalRotationQuaternion ORot = Client.GetSegmentRotation(SubjectName, BoneName);
+            //Output_GetSegmentLocalRotationQuaternion ORot = Client.GetSegmentRotation(SubjectName, BoneName);
+            Output_GetSegmentGlobalRotationQuaternion ORot = Client.GetSegmentGlobalRotationQuaternion(SubjectName, BoneName);
 
             Debug.Log($"Rotation Status: {ORot.Result}");
 
@@ -226,42 +228,51 @@ namespace Assets.ViconUnityPlugin.Scripts
 
                 Debug.Log($"Raw Vicon Rotation: X={ORot.Rotation[0]}, Y={ORot.Rotation[1]}, Z={ORot.Rotation[2]}, W={ORot.Rotation[3]}");
 
-                Quaternion Rot = new Quaternion((float)ORot.Rotation[0], (float)ORot.Rotation[1], (float)ORot.Rotation[2], (float)ORot.Rotation[3]);
-                Quaternion globalRot = new Quaternion(
-              -Rot.x,  // Vicon Y → Unity X (negated)
-               Rot.z,  // Vicon Z → Unity Y
-              Rot.y,  // Vicon X → Unity Z (negated)
-              -Rot.w   // W stays the same
+                //old : 
+                //Quaternion Rot = new Quaternion((float)ORot.Rotation[0], (float)ORot.Rotation[1], (float)ORot.Rotation[2], (float)ORot.Rotation[3]);
+              //Quaternion globalRot = new Quaternion(
+              //ot.x,  // Vicon Y → Unity X (negated)
+              //ot.z,  // Vicon Z → Unity Y
+              //t.y,  // Vicon X → Unity Z (negated)
+              //ot.w   // W stays the same
+              //);
+    
+                    //Corrected Mapping for Unity
+                    Quaternion globalRot = new Quaternion(
+                         (float)ORot.Rotation[0],  // Vicon X → Unity X 
+                         (float)ORot.Rotation[2],   // Vicon Z → Unity Y
+                         -(float)ORot.Rotation[1],   // Vicon Y → Unity Z (negated)
+                         (float)ORot.Rotation[3]    // W stays the same
           );
 
-                if (Bone.parent != null
-                && BoneName != m_RootSegmentName
-                )
-                {
-                    Bone.localRotation = Quaternion.Inverse(Bone.parent.rotation) * globalRot;
-                    Debug.Log($"Applying Local Rotation: {Bone.name} -> {Bone.localRotation}");
-                }
-                else
-                {
+                //if (Bone.parent != null
+                //&& BoneName != m_RootSegmentName
+                //)
+                //{
+                //    Bone.localRotation = Quaternion.Inverse(Bone.parent.rotation) * globalRot;
+                //    Debug.Log($"Applying Local Rotation: {Bone.name} -> {Bone.localRotation}");
+                //}
+                //else
+                //{
                     Bone.rotation = globalRot;
                     Debug.Log($"Applying Rotation: {Bone.name} -> {Bone.rotation}");
-                }
+                //}
 
                 m_LastGoodRotations[BoneName] = globalRot;
             }
             else if (m_LastGoodRotations.ContainsKey(BoneName)) //For occluded data, uses cached pose and applies it differently for root and child segments (using parent transforms for children).
             {
                 Debug.LogWarning("Vicon data is occluded, using last good pose");
-                if (Bone.parent != null
-                && Bone.name != m_RootSegmentName
-                )
-                {
-                    Bone.localRotation = Quaternion.Inverse(Bone.parent.rotation) * m_LastGoodRotations[BoneName];
-                }
-                else
-                {
+               //if (Bone.parent != null
+               //&& Bone.name != m_RootSegmentName
+               //)
+               //{
+               //    Bone.localRotation = Quaternion.Inverse(Bone.parent.rotation) * m_LastGoodRotations[BoneName];
+               //}
+               //else
+               //{
                     Bone.rotation = m_LastGoodRotations[BoneName];
-                }
+                //}
 
             }
 
@@ -297,24 +308,35 @@ namespace Assets.ViconUnityPlugin.Scripts
 
                 globalPosition += PositionOffset;
 
-                //Applies rotation and position differently for root vs. child segments:
-                //  •	For root: sets Bone.rotation and Bone.position.
-                //  •	For children: sets Bone.localRotation and Bone.localPosition using parent transforms.
+                // 1.Choice: Applies position differently for root vs. child segments:
+                //  •	For root: sets Bone.position.
+                //  •	For children: sets Bone.localPosition using parent transforms.
 
-                if (Bone.parent != null
-                && BoneName != m_RootSegmentName
-                )
-                {
-                    Bone.localPosition = Bone.parent.InverseTransformPoint(globalPosition);
-                    Debug.Log($"Applying Local Position: {Bone.name} -> {Bone.localPosition}");
-                }
-                else
+                //if (Bone.parent != null
+                //&& BoneName != m_RootSegmentName
+                //)
+                //{
+                //    Bone.localPosition = Bone.parent.InverseTransformPoint(globalPosition);
+                //    Debug.Log($"Applying Local Position: {Bone.name} -> {Bone.localPosition}");
+                //}
+                //else
+                //{
+                //    Bone.position = globalPosition;
+                //    Debug.Log($"Applying Position: {Bone.name} -> {Bone.position}");
+                //}
+
+                //m_LastGoodPositions[BoneName] = globalPosition;
+
+
+                // 2.Choice: Only apply translation if it is the ROOT segment. 
+                // Children are physically attached hinges, so we ignore their translation
+                // and let Unity's hierarchy keep them glued to the parent.
+                if (BoneName == m_RootSegmentName)
                 {
                     Bone.position = globalPosition;
-                    Debug.Log($"Applying Position: {Bone.name} -> {Bone.position}");
+                    m_LastGoodPositions[BoneName] = globalPosition;
+                    Debug.Log($"Applying Root Position: {Bone.name} -> {Bone.position}");
                 }
-
-                m_LastGoodPositions[BoneName] = globalPosition;
 
             }
             else if (m_LastGoodPositions.ContainsKey(BoneName))
